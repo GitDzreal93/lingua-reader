@@ -63,8 +63,8 @@ export const Reader = ({ data }: ReaderProps) => {
       result = result.replace(
         regex,
         `<span class="inline-flex items-center">
-           <span class="bg-[#FFF3D6] px-1">${word}</span>
-           <span class="text-[#666666] text-sm ml-0.5">(${highlightedWords[word as keyof typeof highlightedWords]})</span>
+           <span class="bg-[#FFF3D6] px-1 rounded">${word}</span>
+           <span class="text-[#666666] text-sm ml-1">(${highlightedWords[word as keyof typeof highlightedWords]})</span>
          </span>`
       );
     });
@@ -79,40 +79,49 @@ export const Reader = ({ data }: ReaderProps) => {
           <div className="flex-1">
             {/* 输入区域 */}
             <div className="mb-8 flex gap-4 items-start">
-              <div className="flex-1 bg-white rounded-2xl shadow-[0_0_15px_rgba(0,0,0,0.05)]">
+              <div className="flex-1">
                 <textarea
-                  className="w-full px-6 py-4 text-gray-800 placeholder-gray-400 bg-transparent resize-none focus:outline-none h-[100px]"
+                  className="w-full px-6 py-4 text-gray-800 placeholder-gray-400 bg-white rounded-lg border border-gray-200 resize-none focus:outline-none focus:border-gray-300 h-[120px]"
                   placeholder="输入中文文本生成中英文对照..."
                 />
               </div>
-              <button className="w-[80px] h-[45px] bg-[#E84C3D] text-white text-base font-medium rounded-xl hover:bg-[#E84C3D]/90 transition-colors flex items-center justify-center shrink-0">
+              <button className="w-[80px] h-[45px] bg-[#E84C3D] text-white text-base font-medium rounded-lg hover:bg-[#E84C3D]/90 transition-colors flex items-center justify-center shrink-0">
                 翻译
               </button>
             </div>
 
             {/* 中英对照区域 */}
-            {data.en.map((text, index) => (
-              <div key={index} className="mb-4 flex">
-                <div className="flex-1 bg-white p-4 text-[15px] leading-relaxed text-gray-800">
-                  {renderHighlightedText(text)}
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              {data.en.map((text, index) => (
+                <div key={index} className="flex items-stretch">
+                  <div className="flex-1 p-4 text-[15px] leading-relaxed text-gray-800">
+                    {renderHighlightedText(text)}
+                  </div>
+                  <div className="flex flex-col items-center mx-6">
+                    <div className="flex-1 w-[1px] bg-gray-200"></div>
+                    <div className="w-1.5 h-1.5 rounded-full bg-gray-300 my-4"></div>
+                    <div className="flex-1 w-[1px] bg-gray-200"></div>
+                  </div>
+                  <div className="flex-1 p-4 text-[15px] leading-relaxed text-gray-800">
+                    {data.zh[index]}
+                  </div>
                 </div>
-                <div className="w-[1px] bg-gray-200 mx-6"></div>
-                <div className="flex-1 bg-white p-4 text-[15px] leading-relaxed text-gray-800">
-                  {data.zh[index]}
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
           {/* 词汇列表 */}
-          <div className="w-[220px] shrink-0 pt-[128px]">
-            <div className="bg-white rounded-lg overflow-hidden shadow-lg sticky top-8">
-              <div className="p-2 border-b border-gray-100">
+          <div className="w-[220px] shrink-0">
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden sticky top-8">
+              <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
+                <h3 className="text-base font-medium text-gray-800">单词表</h3>
+              </div>
+              <div className="p-2 border-b border-gray-200">
                 <div className="flex gap-1">
                   {(['Nouns', 'Verbs', 'Adjectives'] as const).map((tab) => (
                     <button
                       key={tab}
-                      className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${
+                      className={`px-3 py-1 text-sm font-medium rounded transition-colors ${
                         activeTab === tab
                           ? 'bg-[#E84C3D] text-white'
                           : 'text-gray-600 hover:bg-gray-100'
@@ -130,7 +139,7 @@ export const Reader = ({ data }: ReaderProps) => {
                   return (
                     <div
                       key={index}
-                      className="px-4 py-3 hover:bg-gray-50 transition-colors"
+                      className="px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
                     >
                       <div className="text-[15px] font-medium text-gray-800 mb-0.5">
                         {term}
