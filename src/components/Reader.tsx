@@ -78,14 +78,14 @@ export const Reader = ({ data }: ReaderProps) => {
           {/* 左侧主要内容区域 */}
           <div className="flex-1">
             {/* 输入区域 */}
-            <div className="mb-8 flex gap-4">
+            <div className="mb-8 flex gap-4 items-start">
               <div className="flex-1 bg-white rounded-2xl shadow-[0_0_15px_rgba(0,0,0,0.05)]">
                 <textarea
                   className="w-full px-6 py-4 text-gray-800 placeholder-gray-400 bg-transparent resize-none focus:outline-none h-[100px]"
                   placeholder="输入中文文本生成中英文对照..."
                 />
               </div>
-              <button className="w-[100px] h-[100px] bg-[#E84C3D] text-white font-medium rounded-2xl hover:bg-[#E84C3D]/90 transition-colors flex items-center justify-center shrink-0">
+              <button className="w-[80px] h-[45px] bg-[#E84C3D] text-white text-base font-medium rounded-xl hover:bg-[#E84C3D]/90 transition-colors flex items-center justify-center shrink-0">
                 翻译
               </button>
             </div>
