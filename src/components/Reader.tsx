@@ -19,6 +19,8 @@ interface ReaderProps {
 export const Reader = ({ data }: ReaderProps) => {
   const [selectedText, setSelectedText] = useState('');
   const [activeTab, setActiveTab] = useState<'Nouns' | 'Verbs' | 'Adjectives'>('Nouns');
+  const [inputText, setInputText] = useState('');
+  const [isTranslating, setIsTranslating] = useState(false);
 
   useEffect(() => {
     const handleMouseUp = () => {
@@ -33,6 +35,45 @@ export const Reader = ({ data }: ReaderProps) => {
       document.removeEventListener('mouseup', handleMouseUp);
     };
   }, []);
+
+  // 调用 Coze API 的函数
+  const translateText = async () => {
+    if (!inputText.trim() || isTranslating) return;
+
+    setIsTranslating(true);
+    try {
+      const response = await fetch('https://api.coze.cn/conversation/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.COZE_API_TOKEN}`
+        },
+        body: JSON.stringify({
+          bot_id: process.env.NEXT_PUBLIC_COZE_BOT_ID,
+          messages: [
+            {
+              role: 'user',
+              content: inputText
+            }
+          ]
+        })
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        // 处理翻译结果
+        console.log('Translation result:', result);
+        // TODO: 更新界面显示翻译结果
+      } else {
+        console.error('Translation failed:', result.message);
+      }
+    } catch (error) {
+      console.error('Error during translation:', error);
+    } finally {
+      setIsTranslating(false);
+    }
+  };
 
   // 模拟高亮单词数据
   const highlightedWords = {
@@ -81,12 +122,20 @@ export const Reader = ({ data }: ReaderProps) => {
             <div className="mb-8 flex gap-4 items-start">
               <div className="flex-1">
                 <textarea
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
                   className="w-full px-6 py-4 text-gray-800 placeholder-gray-400 bg-white rounded-lg border border-gray-200 resize-none focus:outline-none focus:border-gray-300 h-[120px]"
                   placeholder="输入中文文本生成中英文对照..."
                 />
               </div>
-              <button className="w-[80px] h-[45px] bg-[#E84C3D] text-white text-base font-medium rounded-lg hover:bg-[#E84C3D]/90 transition-colors flex items-center justify-center shrink-0">
-                翻译
+              <button
+                onClick={translateText}
+                disabled={isTranslating || !inputText.trim()}
+                className={`w-[80px] h-[45px] bg-[#E84C3D] text-white text-base font-medium rounded-lg hover:bg-[#E84C3D]/90 transition-colors flex items-center justify-center shrink-0 ${
+                  (isTranslating || !inputText.trim()) ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                {isTranslating ? '翻译中' : '翻译'}
               </button>
             </div>
 
