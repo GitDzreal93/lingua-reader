@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chinese-English Parallel Reading</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        
+        .platform-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            padding: 24px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: flex-end;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 20px;
+        }
+        
+        .header-link {
+            margin-left: 20px;
+            color: #e74c3c;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .input-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f8f8;
+            border-radius: 12px;
+        }
+        
+        .input-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .input-container {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .text-input {
+            flex: 1;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .translate-button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0 25px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 15px;
+            transition: background-color 0.2s;
+        }
+        
+        .translate-button:hover {
+            background-color: #c0392b;
+        }
+        
+        .article-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 16px;
+            color: #222;
+        }
+        
+        .article-source {
+            color: #888;
+            margin-bottom: 24px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .article-source img {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .parallel-row {
+            display: flex;
+            line-height: 1.8;
+        }
+        
+        .english, .chinese {
+            padding: 8px 12px;
+            flex: 1;
+        }
+        
+        .english {
+            padding-right: 30px;
+        }
+        
+        .chinese {
+            color: #666;
+        }
+        
+        .highlighted {
+            background-color: #ffd88a;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+        
+        .translation {
+            color: #e74c3c;
+            font-size: 0.9em;
+            margin-left: 4px;
+        }
+        
+        .sidebar {
+            position: fixed;
+            right: 20px;
+            top: 100px;
+            width: 220px;
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            padding: 16px;
+        }
+        
+        .button-primary {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 12px;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 16px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .button-primary svg {
+            margin-right: 8px;
+        }
+        
+        .difficulty-selector {
+            display: flex;
+            background-color: #f0f0f0;
+            border-radius: 25px;
+            margin: 16px 0;
+            overflow: hidden;
+        }
+        
+        .difficulty-option {
+            flex: 1;
+            padding: 8px;
+            text-align: center;
+            cursor: pointer;
+        }
+        
+        .difficulty-option.active {
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        
+        .word-category {
+            display: flex;
+            gap: 8px;
+            margin: 16px 0;
+            overflow-x: auto;
+        }
+        
+        .category-tag {
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 14px;
+            background-color: #f0f0f0;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        
+        .category-tag.active {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .vocabulary-list {
+            margin-top: 16px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .word-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .word-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .english-word {
+            font-weight: bold;
+        }
+        
+        .word-type {
+            font-size: 12px;
+            color: #888;
+            margin: 2px 0;
+        }
+        
+        .chinese-meaning {
+            color: #666;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .loading-indicator {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .loading-indicator.active {
+            display: block;
+        }
+        
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #e74c3c;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 1200px) {
+            .sidebar {
+                position: static;
+                width: auto;
+                margin-top: 30px;
+            }
+            
+            .input-container {
+                flex-direction: column;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .parallel-row {
+                flex-direction: column;
+            }
+            
+            .english {
+                padding-right: 12px;
+                border-bottom: 1px solid #eee;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="platform-container">
+        <div class="main-content">
+            <div class="input-container">
+                <textarea class="text-input" placeholder="输入中文文本生成中英文对照"></textarea>
+                <button class="translate-button" onclick="simulateTranslation()">翻译</button>
+            </div>
+            
+            <div class="loading-indicator" id="loadingIndicator">
+                <div class="loading-spinner"></div>
+                <div>正在处理您的文本，生成翻译和词汇表...</div>
+            </div>
+        
+        <div class="container" id="contentContainer">
+            <div class="parallel-row">
+                <div class="english">WASHINGTON AP All it <span class="highlighted">took</span> was 90 seconds for weeks of <span class="highlighted">tortured</span><span class="translation">(折磨)</span> <span class="highlighted">diplomacy</span><span class="translation">(外交)</span> to <span class="highlighted">unwind</span><span class="translation">(被毁)</span> in spectacular fashion</div>
+                <div class="chinese">华盛顿美联社 只需90秒，持续数周的备受折磨的外交关系就以惊人的方式崩塌</div>
+            </div>
+            
+            <div class="parallel-row">
+                <div class="english">President Donald <span class="highlighted">Trump</span><span class="translation">(特朗普)</span> s Oval Office <span class="highlighted">thrashing</span><span class="translation">(痛骂)</span> of Ukraine s Volodymyr Zelenskyy on Friday laid <span class="highlighted">bare</span><span class="translation">(揭露)</span> the limits of a yearslong press by America s <span class="highlighted">allies</span><span class="translation">(同盟国)</span> aimed at <span class="highlighted">reshaping</span><span class="translation">(重塑)</span> <span class="highlighted">Trump</span><span class="translation">(特朗普)</span> s determination to end Russia s invasion even if the terms are not to Ukraine s liking</div>
+                <div class="chinese">总统唐纳德·特朗普周五在椭圆形办公室对乌克兰的沃洛德米尔·泽连斯基的痛骂，揭露了美国盟友多年来旨在重塑特朗普决心结束俄罗斯入侵的努力的局限性，即使条件不符合乌克兰的意愿</div>
+            </div>
+            
+            <div class="parallel-row">
+                <div class="english">It also stressed the <span class="highlighted">profound</span><span class="translation">(深刻)</span> ways <span class="highlighted">Trump</span><span class="translation">(特朗普)</span> feels <span class="highlighted">emboldened</span><span class="translation">(壮胆)</span> to <span class="highlighted">redirect</span><span class="translation">(重定向)</span> U S foreign policy priorities toward his America First <span class="highlighted">agenda</span><span class="translation">(议程)</span> in ways that extend well beyond those of his <span class="highlighted">tumultuous</span><span class="translation">(动荡)</span> first term</div>
+                <div class="chinese">它还强调了特朗普感到有底气将美国外交政策优先事项重新定向为他的"美国优先"议程的深刻方式，这种方式远远超出了他动荡的第一任期</div>
+            </div>
+            
+            <div class="parallel-row">
+                <div class="english">The sudden blowup was the most heated public exchange of words between world leaders in the Oval Office in memory as the usual <span class="highlighted">staid</span><span class="translation">(稳重)</span> work of <span class="highlighted">diplomacy</span><span class="translation">(外交)</span> descended into finger-pointing shouting and eye-rolling</div>
+                <div class="chinese">这次突然的爆发是记忆中椭圆形办公室内世界领导人之间最激烈的公开言辞交锋，通常稳重的外交工作演变成了指责、喊叫和翻白眼</div>
+            </div>
+            
+            <div class="parallel-row">
+                <div class="english">The encounter left the future of the U S -Ukraine relationship and Kyiv s ability to defend itself in the <span class="highlighted">brutal</span><span class="translation">(残酷)</span> conflict with Russia in <span class="highlighted">mortal</span><span class="translation">(凡人)</span> <span class="highlighted">jeopardy</span><span class="translation">(危险之中)</span></div>
+                <div class="chinese">这次会面使美乌关系的未来以及基辅在与俄罗斯的残酷冲突中保卫自己的能力处于生死危险之中</div>
+            </div>
+            
+            <div class="parallel-row">
+                <div class="english">You either make a deal or we are out <span class="highlighted">Trump</span><span class="translation">(特朗普)</span> told Zelenskyy <span class="highlighted">underscoring</span><span class="translation">(下划线)</span> the American leader s plans to <span class="highlighted">dictate</span><span class="translation">(支配)</span> a <span class="highlighted">swift</span><span class="translation">(迅速大胆)</span> end to the war or leave its <span class="highlighted">longtime</span><span class="translation">(长期)</span> <span class="highlighted">ally</span><span class="translation">(盟友)</span> to continue the fight without its strongest <span class="highlighted">backer</span><span class="translation">(靠山)</span></div>
+                <div class="chinese">特朗普对泽连斯基说，"你要么达成协议，要么我们就退出"，强调美国领导人计划要么迅速结束战争，要么让其长期盟友在没有最强大靠山的情况下继续战斗</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="sidebar">
+        
+        <div class="word-category">
+            <div class="category-tag active">Nouns</div>
+            <div class="category-tag">Verbs</div>
+            <div class="category-tag">Adjectives</div>
+            <div class="category-tag">Adverbs</div>
+        </div>
+        
+        <div class="vocabulary-list" id="vocabularyList">
+            <div class="word-item">
+                <div class="word-info">
+                    <div class="english-word">acknowledged</div>
+                    <div class="word-type">verb. 承认</div>
+                </div>
+            </div>
+            
+            <div class="word-item">
+                <div class="word-info">
+                    <div class="english-word">advisers</div>
+                    <div class="word-type">noun. 顾问</div>
+                </div>
+            </div>
+            
+            <div class="word-item">
+                <div class="word-info">
+                    <div class="english-word">agenda</div>
+                    <div class="word-type">noun. 议程</div>
+                </div>
+            </div>
+            
+            <div class="word-item">
+                <div class="word-info">
+                    <div class="english-word">aggression</div>
+                    <div class="word-type">noun. 侵略</div>
+                </div>
+            </div>
+            
+            <div class="word-item">
+                <div class="word-info">
+                    <div class="english-word">allies</div>
+                    <div class="word-type">noun. 同盟国</div>
+                </div>
+            </div>
+            
+            <div class="word-item">
+                <div class="word-info">
+                    <div class="english-word">ally</div>
+                    <div class="word-type">noun. 盟友</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Simulate translation functionality
+        function simulateTranslation() {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const textInput = document.querySelector('.text-input');
+            const contentContainer = document.getElementById('contentContainer');
+            const vocabularyList = document.getElementById('vocabularyList');
+            
+            // Validate input
+            if (!textInput.value.trim()) {
+                alert('请输入中文文本');
+                return;
+            }
+            
+            // Show loading indicator
+            loadingIndicator.classList.add('active');
+            
+            // Simulate API delay
+            setTimeout(() => {
+                // Create sample content based on user input
+                const userText = textInput.value.trim();
+                
+                // Split text into sentences (simple implementation)
+                const sentences = userText.split(/[。！？.!?]/).filter(sentence => sentence.trim().length > 0);
+                
+                // Clear existing content
+                contentContainer.innerHTML = '';
+                
+                // Simulate translation and add new content
+                sentences.forEach((sentence, index) => {
+                    if (sentence.trim().length > 0) {
+                        const translatedSentence = simulateEnglishTranslation(sentence, index);
+                        contentContainer.innerHTML += `
+                            <div class="parallel-row">
+                                <div class="english">${translatedSentence}</div>
+                                <div class="chinese">${sentence}</div>
+                            </div>
+                        `;
+                    }
+                });
+                
+                // Update vocabulary list
+                updateVocabularyList(userText);
+                
+                // Hide loading indicator
+                loadingIndicator.classList.remove('active');
+                
+                // Update article title
+                document.querySelector('.article-title').textContent = 
+                    userText.length > 50 ? userText.substring(0, 50) + '...' : userText;
+                
+                // Update source info
+                document.querySelector('.article-source').innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                    </svg>
+                    User Input Translation
+                `;
+            }, 1500);
+        }
+        
+        // Simulate English translation with highlighted vocabulary
+        function simulateEnglishTranslation(chineseSentence, seedIndex) {
+            // Sample vocabulary for highlighting (would come from real translation API)
+            const vocabularyBank = [
+                {en: 'development', zh: '发展', type: 'noun'},
+                {en: 'economic', zh: '经济的', type: 'adj'},
+                {en: 'government', zh: '政府', type: 'noun'},
+                {en: 'implement', zh: '实施', type: 'verb'},
+                {en: 'policy', zh: '政策', type: 'noun'},
+                {en: 'research', zh: '研究', type: 'noun'},
+                {en: 'significant', zh: '重要的', type: 'adj'},
+                {en: 'technology', zh: '技术', type: 'noun'},
+                {en: 'international', zh: '国际的', type: 'adj'},
+                {en: 'cooperation', zh: '合作', type: 'noun'},
+                {en: 'establish', zh: '建立', type: 'verb'},
+                {en: 'relationship', zh: '关系', type: 'noun'},
+                {en: 'encourage', zh: '鼓励', type: 'verb'},
+                {en: 'improve', zh: '改善', type: 'verb'},
+                {en: 'investment', zh: '投资', type: 'noun'}
+            ];
+            
+            // Generate a simple translation based on sentence length
+            const sentenceLength = chineseSentence.length;
+            let translationWords = [];
+            
+            // Add some basic structure
+            translationWords.push('The');
+            
+            // Add some content based on the Chinese text length
+            for (let i = 0; i < Math.min(sentenceLength / 3, 15); i++) {
+                // Use a deterministic approach based on input and position to select "random" words
+                const wordIndex = (seedIndex * 3 + i * 7) % vocabularyBank.length;
+                translationWords.push(vocabularyBank[wordIndex].en);
+                
+                // Add some common English words for structure
+                if (i % 3 === 0) translationWords.push('and');
+                if (i % 4 === 0) translationWords.push('with');
+                if (i % 5 === 0) translationWords.push('for');
+            }
+            
+            // Add a simple ending
+            translationWords.push('was confirmed');
+            
+            // Highlight some words
+            let translatedText = '';
+            translationWords.forEach((word, index) => {
+                if (vocabularyBank.some(v => v.en === word) && index % 3 === 0) {
+                    const vocab = vocabularyBank.find(v => v.en === word);
+                    translatedText += ` <span class="highlighted">${word}</span><span class="translation">(${vocab.zh})</span>`;
+                } else {
+                    translatedText += ` ${word}`;
+                }
+            });
+            
+            return translatedText.trim();
+        }
+        
+        // Update vocabulary list based on input text
+        function updateVocabularyList(text) {
+            const vocabularyList = document.getElementById('vocabularyList');
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing vocabulary
+            vocabularyList.innerHTML = '';
+            
+            // Generate vocabulary based on text characteristics (simplified demo)
+            const vocabularyOptions = [
+                {word: 'development', type: 'noun', meaning: '发展'},
+                {word: 'economic', type: 'adj', meaning: '经济的'},
+                {word: 'policy', type: 'noun', meaning: '政策'},
+                {word: 'implement', type: 'verb', meaning: '实施'},
+                {word: 'research', type: 'noun', meaning: '研究'},
+                {word: 'technology', type: 'noun', meaning: '技术'},
+                {word: 'international', type: 'adj', meaning: '国际的'},
+                {word: 'cooperation', type: 'noun', meaning: '合作'},
+                {word: 'establish', type: 'verb', meaning: '建立'},
+                {word: 'relationship', type: 'noun', meaning: '关系'},
+                {word: 'encourage', type: 'verb', meaning: '鼓励'},
+                {word: 'improve', type: 'verb', meaning: '改善'},
+                {word: 'investment', type: 'noun', meaning: '投资'}
+            ];
+            
+            // Clear existing
