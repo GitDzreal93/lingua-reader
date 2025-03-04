@@ -18,6 +18,7 @@ interface ReaderProps {
 
 // 词性分类的中英文映射
 const WORD_TYPES = {
+  'All': '全部',
   'Noun': '名词',
   'Verb': '动词',
   'Adjective': '形容词',
@@ -36,7 +37,7 @@ type WordType = keyof typeof WORD_TYPES;
 
 export const Reader = ({ data: initialData }: ReaderProps) => {
   const [selectedText, setSelectedText] = useState('');
-  const [activeTab, setActiveTab] = useState<WordType>('Noun');
+  const [activeTab, setActiveTab] = useState<WordType>('All');  // 默认选中"全部"
   const [inputText, setInputText] = useState('');
   const [isTranslating, setIsTranslating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -144,13 +145,20 @@ export const Reader = ({ data: initialData }: ReaderProps) => {
 
   // 按词性分类单词
   const groupedWords = useMemo(() => {
-    const groups: Record<string, Word[]> = {};
-    data.words.forEach(word => {
+    const groups: Record<string, Word[]> = {
+      All: [...(data.words || [])]
+        .filter((word): word is Word => !!word && typeof word.word === 'string')
+        .sort((a, b) => a.word.localeCompare(b.word))
+    };
+    
+    data.words?.forEach(word => {
+      if (!word) return;
       if (!groups[word.type]) {
         groups[word.type] = [];
       }
       groups[word.type].push(word);
     });
+    
     return groups;
   }, [data.words]);
 
@@ -278,4 +286,4 @@ export const Reader = ({ data: initialData }: ReaderProps) => {
       </main>
     </div>
   );
-}; 
+};
