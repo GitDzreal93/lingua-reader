@@ -54,50 +54,8 @@ export const Reader = ({ data: initialData }: ReaderProps) => {
       model: selectedModel
     },
     onResponse: (response) => {
-      // 处理流式响应中的数据
-      const reader = response.body?.getReader();
-      if (!reader) return;
-
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      const processChunk = async () => {
-        try {
-          const { done, value } = await reader.read();
-          if (done) {
-            // 处理最后一个完整的 JSON 对象
-            if (buffer) {
-              try {
-                const result = JSON.parse(buffer);
-                setData(result);
-                setHasTranslated(true);
-              } catch (e) {
-                console.error('Failed to parse final buffer:', e);
-              }
-            }
-            return;
-          }
-
-          buffer += decoder.decode(value);
-          
-          // 尝试解析完整的 JSON 对象
-          try {
-            const result = JSON.parse(buffer);
-            setData(result);
-            setHasTranslated(true);
-            buffer = ''; // 清空缓冲区
-          } catch (e) {
-            // 如果解析失败，继续累积数据
-          }
-
-          // 继续读取下一个数据块
-          processChunk();
-        } catch (e) {
-          console.error('Error processing chunk:', e);
-        }
-      };
-
-      processChunk();
+      // 使用 ai 包提供的数据处理机制
+      setHasTranslated(true);
     },
     onError: (error) => {
       console.error('Chat error:', error);

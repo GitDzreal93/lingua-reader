@@ -9,15 +9,18 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^1.1.14",
     "@ai-sdk/deepseek": "^0.1.12",
     "@ai-sdk/google": "^1.1.19",
     "@ai-sdk/openai": "^1.2.0",
+    "@ai-sdk/xai": "^1.1.12",
     "@google/generative-ai": "^0.23.0",
     "ai": "^4.1.50",
     "next": "15.2.0",
     "openai": "^4.86.1",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
