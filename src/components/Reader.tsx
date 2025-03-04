@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useChat } from 'ai/react';
 
 interface Word {
   word: string;
@@ -35,14 +36,81 @@ const WORD_TYPES = {
 
 type WordType = keyof typeof WORD_TYPES;
 
+// 可用的 AI 模型
+const AI_MODELS = {
+  'openai': 'OpenAI',
+  'gemini': 'Google Gemini',
+  'deepseek': 'DeepSeek'
+} as const;
+
+type AIModel = keyof typeof AI_MODELS;
+
 export const Reader = ({ data: initialData }: ReaderProps) => {
+  const [selectedModel, setSelectedModel] = useState<AIModel>('openai');
+  
+  const { messages, input, handleInputChange, handleSubmit, isLoading, error: chatError } = useChat({
+    api: '/api/translate',
+    body: {
+      model: selectedModel
+    },
+    onResponse: (response) => {
+      // 处理流式响应中的数据
+      const reader = response.body?.getReader();
+      if (!reader) return;
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      const processChunk = async () => {
+        try {
+          const { done, value } = await reader.read();
+          if (done) {
+            // 处理最后一个完整的 JSON 对象
+            if (buffer) {
+              try {
+                const result = JSON.parse(buffer);
+                setData(result);
+                setHasTranslated(true);
+              } catch (e) {
+                console.error('Failed to parse final buffer:', e);
+              }
+            }
+            return;
+          }
+
+          buffer += decoder.decode(value);
+          
+          // 尝试解析完整的 JSON 对象
+          try {
+            const result = JSON.parse(buffer);
+            setData(result);
+            setHasTranslated(true);
+            buffer = ''; // 清空缓冲区
+          } catch (e) {
+            // 如果解析失败，继续累积数据
+          }
+
+          // 继续读取下一个数据块
+          processChunk();
+        } catch (e) {
+          console.error('Error processing chunk:', e);
+        }
+      };
+
+      processChunk();
+    },
+    onError: (error) => {
+      console.error('Chat error:', error);
+      setError(error.message);
+    }
+  });
+
   const [selectedText, setSelectedText] = useState('');
-  const [activeTab, setActiveTab] = useState<WordType>('All');  // 默认选中"全部"
-  const [inputText, setInputText] = useState('');
-  const [isTranslating, setIsTranslating] = useState(false);
+  const [activeTab, setActiveTab] = useState<WordType>('All');
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState(initialData);
   const [hasTranslated, setHasTranslated] = useState(false);
+  const [showAnnotation, setShowAnnotation] = useState(true);
 
   useEffect(() => {
     const handleMouseUp = () => {
@@ -60,50 +128,9 @@ export const Reader = ({ data: initialData }: ReaderProps) => {
 
   // 重置所有状态
   const handleReset = () => {
-    setInputText('');
     setError(null);
     setData(initialData);
     setHasTranslated(false);
-  };
-
-  // 调用 Coze API 的函数
-  const translateText = async () => {
-    if (!inputText.trim() || isTranslating) return;
-  
-    setIsTranslating(true);
-    setError(null);
-  
-    try {
-      const response = await fetch('/api/translate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          text: inputText
-        })
-      });
-  
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || '翻译请求失败');
-      }
-  
-      const result = await response.json();
-      
-      if (result.success && result.data) {
-        setData(result.data);
-        // 删除这行：setInputText('');
-        setHasTranslated(true);
-      } else {
-        throw new Error(result.message || '翻译失败，请稍后重试');
-      }
-    } catch (error) {
-      console.error('Translation error:', error);
-      setError(error instanceof Error ? error.message : '网络错误，请稍后重试');
-    } finally {
-      setIsTranslating(false);
-    }
   };
 
   // 模拟高亮单词数据
@@ -127,9 +154,6 @@ export const Reader = ({ data: initialData }: ReaderProps) => {
     'mortal': '凡人',
     'jeopardy': '危险之中'
   };
-
-  // 在状态部分添加新的状态
-  const [showAnnotation, setShowAnnotation] = useState(true);
 
   const renderHighlightedText = (text: string) => {
     let result = text;
@@ -193,32 +217,47 @@ export const Reader = ({ data: initialData }: ReaderProps) => {
             <div className="mb-8 flex flex-col gap-4">
               <div className="flex gap-4 items-start">
                 <div className="flex-1 relative">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="text-sm text-gray-600">选择模型：</div>
+                    <div className="flex gap-2">
+                      {Object.entries(AI_MODELS).map(([key, label]) => (
+                        <button
+                          key={key}
+                          onClick={() => setSelectedModel(key as AIModel)}
+                          disabled={key === 'openai'}
+                          className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                            selectedModel === key
+                              ? 'bg-[#E84C3D] text-white'
+                              : key === 'openai'
+                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                   <textarea
-                    value={inputText}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (value.length <= 1024) {
-                        setInputText(value);
-                        setError(null);
-                      }
-                    }}
+                    value={input}
+                    onChange={handleInputChange}
                     maxLength={1024}
                     className="w-full px-6 py-4 pb-8 text-gray-800 placeholder-gray-400 bg-white rounded-lg border border-gray-200 resize-none focus:outline-none focus:border-gray-300 h-[120px]"
                     placeholder="输入中文文本生成中英文对照...(最多1024个字符)"
                   />
                   <div className="absolute bottom-3 right-3 px-2 py-0.5 bg-gray-100 rounded text-xs text-gray-500 select-none">
-                    {inputText.length}/1024
+                    {input.length}/1024
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
                   <button
-                    onClick={translateText}
-                    disabled={isTranslating || !inputText.trim()}
+                    onClick={() => handleSubmit(new Event('submit'))}
+                    disabled={isLoading || !input.trim()}
                     className={`w-[80px] h-[45px] bg-[#E84C3D] text-white text-base font-medium rounded-lg hover:bg-[#E84C3D]/90 transition-colors flex items-center justify-center shrink-0 ${
-                      (isTranslating || !inputText.trim()) ? 'opacity-50 cursor-not-allowed' : ''
+                      (isLoading || !input.trim()) ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
                   >
-                    {isTranslating ? '翻译中' : '翻译'}
+                    {isLoading ? '翻译中' : '翻译'}
                   </button>
                   <button
                     onClick={handleReset}
@@ -228,8 +267,10 @@ export const Reader = ({ data: initialData }: ReaderProps) => {
                   </button>
                 </div>
               </div>
-              {error && (
-                <div className="text-[#E84C3D] text-sm">{error}</div>
+              {(error || chatError) && (
+                <div className="text-[#E84C3D] text-sm">
+                  {error || (chatError instanceof Error ? chatError.message : String(chatError))}
+                </div>
               )}
             </div>
 
