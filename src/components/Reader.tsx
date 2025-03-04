@@ -136,7 +136,6 @@ export const Reader = ({ data: initialData }: ReaderProps) => {
       const escapedWord = word.word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const regex = new RegExp(`\\b${escapedWord}\\b|${escapedWord}`, 'gi');
       
-      // 只处理第一次出现的单词
       const firstMatch = regex.exec(result);
       if (firstMatch && !processedWords.has(word.word.toLowerCase())) {
         const prefix = result.slice(0, firstMatch.index);
@@ -144,7 +143,7 @@ export const Reader = ({ data: initialData }: ReaderProps) => {
         
         result = `${prefix}<span class="inline-flex items-center">
           <span class="text-[#F97316]">${firstMatch[0]}</span>
-          <span class="text-[#666666] text-sm ml-1">(${word.meaning})</span>
+          <span class="text-[#666666] text-[11px] ml-1 font-['SimSun']">(${word.meaning})</span>
         </span>${suffix}`;
         
         processedWords.add(word.word.toLowerCase());
