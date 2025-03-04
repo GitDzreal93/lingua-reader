@@ -28,7 +28,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${geistSans.className} ${specialElite.variable}`}>
+      <body className={`${geistSans.className} ${specialElite.className}`}>
         {children}
       </body>
     </html>
