@@ -286,12 +286,14 @@ export const Reader = ({ data: initialData }: ReaderProps) => {
                       key={index}
                       className="px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
                     >
-                      <div className="text-[15px] font-medium text-gray-800 mb-0.5">
+                      <div className="text-[15px] font-bold text-[#F97316] mb-1">
                         {word.word}
                       </div>
-                      <div className="flex items-center gap-1 text-sm">
-                        <span className="text-gray-400">{WORD_TYPES[word.type as WordType] || '未知'}</span>
-                        <span className="text-gray-600">{word.meaning}</span>
+                      <div className="flex items-center gap-2 text-xs">
+                        <span className="px-1.5 py-0.5 bg-gray-100 rounded text-gray-500">
+                          {WORD_TYPES[word.type as WordType] || '未知'}
+                        </span>
+                        <span className="text-gray-600 font-['SimSun']">{word.meaning}</span>
                       </div>
                     </div>
                   ))
