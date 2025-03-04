@@ -169,7 +169,15 @@ export const Reader = ({ data: initialData }: ReaderProps) => {
       groups[word.type].push(word);
     });
     
-    return groups;
+    // 过滤掉没有单词的分类
+    const filteredGroups: Record<string, Word[]> = {};
+    Object.entries(groups).forEach(([type, words]) => {
+      if (type === 'All' || words.length > 0) {
+        filteredGroups[type] = words;
+      }
+    });
+    
+    return filteredGroups;
   }, [data.words]);
 
   return (
@@ -256,19 +264,21 @@ export const Reader = ({ data: initialData }: ReaderProps) => {
               </div>
               <div className="p-2 border-b border-gray-200">
                 <div className="flex flex-wrap gap-1">
-                  {Object.entries(WORD_TYPES).map(([type, label]) => (
-                    <button
-                      key={type}
-                      className={`px-3 py-1 text-sm font-medium rounded transition-colors ${
-                        activeTab === type
-                          ? 'bg-[#E84C3D] text-white'
-                          : 'text-gray-600 hover:bg-gray-100'
-                      }`}
-                      onClick={() => setActiveTab(type as WordType)}
-                    >
-                      {label}
-                    </button>
-                  ))}
+                  {Object.entries(WORD_TYPES)
+                    .filter(([type]) => type === 'All' || groupedWords[type]?.length > 0)
+                    .map(([type, label]) => (
+                      <button
+                        key={type}
+                        className={`px-3 py-1 text-sm font-medium rounded transition-colors ${
+                          activeTab === type
+                            ? 'bg-[#E84C3D] text-white'
+                            : 'text-gray-600 hover:bg-gray-100'
+                        }`}
+                        onClick={() => setActiveTab(type as WordType)}
+                      >
+                        {label}
+                      </button>
+                    ))}
                 </div>
               </div>
               <div className="max-h-[calc(100vh-180px)] overflow-y-auto">

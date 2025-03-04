@@ -1,4 +1,5 @@
 import { Reader } from '@/components/Reader';
+import { Header } from '@/components/Header';
 
 // 示例数据
 const sampleData = {
@@ -13,7 +14,7 @@ const sampleData = {
   zh: [
     '眼前蓦然一花，旋即劲风扑面。',
     '陈琮不及细想，臂腕发力，将背包狠狠抡出。',
-    '人包于半空重重相撞，女人喉咙里发出一声极难听的怪叫，整个人被撞飞出去，落地时双臂一个扑腾（陈琮也不知道自己脑子里为什么会冒出"扑腾"这个词），向着过道深处急窜而去。',
+    '人包于半空重重相撞，女人喉咙里发出一声极难听的怪叫，整个人被撞飞出去，落地时双臂一个扑腾（陈琮也不知道自己脑子里是否会冒出"扑腾"这个词），向着过道深处急窜而去。',
     '动静这么大，同一隔间的其它人不可能不惊觉，只不过他们先前都睡得死沉，突然惊醒，看到的已是事件尾声，一时都有点茫然。',
     '小青年呵欠打了一半，结结巴巴："刚那…… 是猫吗？"',
     '中铺有人反驳："猫能有那么大个头？是狗，大狗！"'
@@ -33,8 +34,11 @@ const sampleData = {
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <Reader data={sampleData} />
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <div className="p-8">
+        <Reader data={sampleData} />
+      </div>
     </div>
   );
 }
