@@ -20,15 +20,51 @@ const sampleData = {
     '中铺有人反驳："猫能有那么大个头？是狗，大狗！"'
   ],
   words: [
-    'blurred: 模糊的',
-    'gust: 一阵强风',
-    'exert: 施加',
-    'screech: 尖叫',
-    'scurry: 急匆匆地跑',
-    'commotion: 喧闹，骚动',
-    'dazed: 茫然的，头晕目眩的',
-    'stammer: 结巴，口吃',
-    'retort: 反驳'
+    {
+      word: 'blurred',
+      type: 'Adjective',
+      meaning: '模糊的'
+    },
+    {
+      word: 'gust',
+      type: 'Noun',
+      meaning: '一阵强风'
+    },
+    {
+      word: 'exert',
+      type: 'Verb',
+      meaning: '施加'
+    },
+    {
+      word: 'screech',
+      type: 'Verb',
+      meaning: '尖叫'
+    },
+    {
+      word: 'scurry',
+      type: 'Verb',
+      meaning: '急匆匆地跑'
+    },
+    {
+      word: 'commotion',
+      type: 'Noun',
+      meaning: '喧闹，骚动'
+    },
+    {
+      word: 'dazed',
+      type: 'Adjective',
+      meaning: '茫然的，头晕目眩的'
+    },
+    {
+      word: 'stammer',
+      type: 'Verb',
+      meaning: '结巴，口吃'
+    },
+    {
+      word: 'retort',
+      type: 'Verb',
+      meaning: '反驳'
+    }
   ]
 };
 
