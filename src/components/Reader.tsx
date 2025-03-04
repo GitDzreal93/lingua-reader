@@ -69,10 +69,10 @@ export const Reader = ({ data: initialData }: ReaderProps) => {
   // 调用 Coze API 的函数
   const translateText = async () => {
     if (!inputText.trim() || isTranslating) return;
-
+  
     setIsTranslating(true);
     setError(null);
-
+  
     try {
       const response = await fetch('/api/translate', {
         method: 'POST',
@@ -83,17 +83,17 @@ export const Reader = ({ data: initialData }: ReaderProps) => {
           text: inputText
         })
       });
-
+  
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || '翻译请求失败');
       }
-
+  
       const result = await response.json();
       
       if (result.success && result.data) {
         setData(result.data);
-        setInputText('');
+        // 删除这行：setInputText('');
         setHasTranslated(true);
       } else {
         throw new Error(result.message || '翻译失败，请稍后重试');
@@ -130,16 +130,27 @@ export const Reader = ({ data: initialData }: ReaderProps) => {
 
   const renderHighlightedText = (text: string) => {
     let result = text;
-    Object.keys(highlightedWords).forEach(word => {
-      const regex = new RegExp(`\\b${word}\\b`, 'g');
-      result = result.replace(
-        regex,
-        `<span class="inline-flex items-center">
-           <span class="bg-[#FFF3D6] px-1 rounded">${word}</span>
-           <span class="text-[#666666] text-sm ml-1">(${highlightedWords[word as keyof typeof highlightedWords]})</span>
-         </span>`
-      );
+    const processedWords = new Set<string>();
+  
+    data.words.forEach(word => {
+      const escapedWord = word.word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`\\b${escapedWord}\\b|${escapedWord}`, 'gi');
+      
+      // 只处理第一次出现的单词
+      const firstMatch = regex.exec(result);
+      if (firstMatch && !processedWords.has(word.word.toLowerCase())) {
+        const prefix = result.slice(0, firstMatch.index);
+        const suffix = result.slice(firstMatch.index + firstMatch[0].length);
+        
+        result = `${prefix}<span class="inline-flex items-center">
+          <span class="text-[#F97316]">${firstMatch[0]}</span>
+          <span class="text-[#666666] text-sm ml-1">(${word.meaning})</span>
+        </span>${suffix}`;
+        
+        processedWords.add(word.word.toLowerCase());
+      }
     });
+  
     return <div dangerouslySetInnerHTML={{ __html: result }} />;
   };
 
@@ -171,16 +182,23 @@ export const Reader = ({ data: initialData }: ReaderProps) => {
             {/* 输入区域 */}
             <div className="mb-8 flex flex-col gap-4">
               <div className="flex gap-4 items-start">
-                <div className="flex-1">
+                <div className="flex-1 relative">
                   <textarea
                     value={inputText}
                     onChange={(e) => {
-                      setInputText(e.target.value);
-                      setError(null);
+                      const value = e.target.value;
+                      if (value.length <= 1024) {
+                        setInputText(value);
+                        setError(null);
+                      }
                     }}
-                    className="w-full px-6 py-4 text-gray-800 placeholder-gray-400 bg-white rounded-lg border border-gray-200 resize-none focus:outline-none focus:border-gray-300 h-[120px]"
-                    placeholder="输入中文文本生成中英文对照..."
+                    maxLength={1024}
+                    className="w-full px-6 py-4 pb-8 text-gray-800 placeholder-gray-400 bg-white rounded-lg border border-gray-200 resize-none focus:outline-none focus:border-gray-300 h-[120px]"
+                    placeholder="输入中文文本生成中英文对照...(最多1024个字符)"
                   />
+                  <div className="absolute bottom-3 right-3 px-2 py-0.5 bg-gray-100 rounded text-xs text-gray-500 select-none">
+                    {inputText.length}/1024
+                  </div>
                 </div>
                 <div className="flex flex-col gap-2">
                   <button
