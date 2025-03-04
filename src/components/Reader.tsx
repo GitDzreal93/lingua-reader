@@ -128,6 +128,9 @@ export const Reader = ({ data: initialData }: ReaderProps) => {
     'jeopardy': '危险之中'
   };
 
+  // 在状态部分添加新的状态
+  const [showAnnotation, setShowAnnotation] = useState(true);
+
   const renderHighlightedText = (text: string) => {
     let result = text;
     const processedWords = new Set<string>();
@@ -143,7 +146,7 @@ export const Reader = ({ data: initialData }: ReaderProps) => {
         
         result = `${prefix}<span class="inline-flex items-center">
           <span class="text-[#F97316]">${firstMatch[0]}</span>
-          <span class="text-[#666666] text-[11px] ml-1 font-['SimSun']">(${word.meaning})</span>
+          ${showAnnotation ? `<span class="text-[#666666] text-[11px] ml-1 font-['SimSun']">(${word.meaning})</span>` : ''}
         </span>${suffix}`;
         
         processedWords.add(word.word.toLowerCase());
@@ -237,21 +240,40 @@ export const Reader = ({ data: initialData }: ReaderProps) => {
                   暂无翻译内容，请在上方输入框中输入要翻译的文本
                 </div>
               ) : (
-                data.en.map((text, index) => (
-                  <div key={index} className="flex items-stretch">
-                    <div className="flex-1 p-4 text-[15px] leading-relaxed text-gray-800">
-                      {renderHighlightedText(text)}
-                    </div>
-                    <div className="flex flex-col items-center mx-6">
-                      <div className="flex-1 w-[1px] bg-gray-200"></div>
-                      <div className="w-1.5 h-1.5 rounded-full bg-gray-300 my-4"></div>
-                      <div className="flex-1 w-[1px] bg-gray-200"></div>
-                    </div>
-                    <div className="flex-1 p-4 text-[15px] leading-relaxed text-gray-800">
-                      {data.zh[index]}
+                <>
+                  <div className="flex items-center justify-end mb-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-600">显示注释</span>
+                      <button
+                        className={`w-12 h-6 rounded-full transition-colors ${
+                          showAnnotation ? 'bg-[#E84C3D]' : 'bg-gray-200'
+                        }`}
+                        onClick={() => setShowAnnotation(!showAnnotation)}
+                      >
+                        <div
+                          className={`w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform ${
+                            showAnnotation ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
                     </div>
                   </div>
-                ))
+                  {data.en.map((text, index) => (
+                    <div key={index} className="flex items-stretch">
+                      <div className="flex-1 p-4 text-[15px] leading-relaxed text-gray-800">
+                        {renderHighlightedText(text)}
+                      </div>
+                      <div className="flex flex-col items-center mx-6">
+                        <div className="flex-1 w-[1px] bg-gray-200"></div>
+                        <div className="w-1.5 h-1.5 rounded-full bg-gray-300 my-4"></div>
+                        <div className="flex-1 w-[1px] bg-gray-200"></div>
+                      </div>
+                      <div className="flex-1 p-4 text-[15px] leading-relaxed text-gray-800">
+                        {data.zh[index]}
+                      </div>
+                    </div>
+                  ))}
+                </>
               )}
             </div>
           </div>
