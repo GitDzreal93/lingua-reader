@@ -16,11 +16,11 @@ const createModelService = (model: string) => {
   const modelConfigs: ModelConfigs = {
     openai: {
       apiKey: process.env.OPENAI_API_KEY || '',
-      model: 'gpt-3.5-turbo' as AIModel,
+      model: 'gpt-4o' as AIModel,
     },
     gemini: {
       apiKey: process.env.GEMINI_API_KEY || '',
-      model: 'models/gemini-1.5-pro-001' as AIModel,
+      model: 'gemini-1.5-pro' as AIModel,
     },
     deepseek: {
       apiKey: process.env.DEEPSEEK_API_KEY || '',

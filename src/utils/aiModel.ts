@@ -2,10 +2,12 @@ import type { OpenAIProvider } from '@ai-sdk/openai'
 import type { DeepSeekProvider } from '@ai-sdk/deepseek'
 import type { AnthropicProvider } from '@ai-sdk/anthropic'
 import type { XaiProvider } from '@ai-sdk/xai'
+import type { GoogleGenerativeAIProvider } from '@ai-sdk/google'
 import { createOpenAI } from '@ai-sdk/openai'
 import { createDeepSeek } from '@ai-sdk/deepseek'
 import { createAnthropic } from '@ai-sdk/anthropic'
 import { createXai } from '@ai-sdk/xai'
+import { createGoogleGenerativeAI } from '@ai-sdk/google'
 
 export type AIModel = Parameters<OpenAIProvider['chat']>[0]
 
@@ -33,6 +35,12 @@ export interface XaiOptionsModel {
   providerCreator: typeof createXai
 }
 
+export interface GoogleOptionsModel {
+  value: 'Google'
+  children: { value: Parameters<GoogleGenerativeAIProvider['chat']>[0] }[]
+  providerCreator: typeof createGoogleGenerativeAI
+}
+
 export interface SiliconFlowOptionsModel {
   value: 'SiliconFlow'
   children: {
@@ -51,6 +59,7 @@ export type AImodelsOptionsModel = (
   | DeepSeekOptionsModel
   | AnthropicOptionsModel
   | XaiOptionsModel
+  | GoogleOptionsModel
   | SiliconFlowOptionsModel
 )[]
 
@@ -133,6 +142,17 @@ export const AImodelsOptions: AImodelsOptionsModel = [
     providerCreator: createXai,
   },
   {
+    value: 'Google',
+    children: [
+      { value: 'gemini-1.5-pro' },
+      { value: 'gemini-1.5-pro-latest' },
+      { value: 'gemini-1.5-flash' },
+      { value: 'gemini-1.5-flash-latest' },
+      { value: 'gemini-1.0-pro' },
+    ],
+    providerCreator: createGoogleGenerativeAI,
+  },
+  {
     value: 'SiliconFlow',
     children: [
       { value: 'deepseek-ai/DeepSeek-V3' },
@@ -149,6 +169,7 @@ export const AIAPIHostOptions = {
   DeepSeek: 'https://api.deepseek.com/v1',
   Anthropic: 'https://api.anthropic.com/v1',
   xAI: 'https://api.x.ai/v1',
+  Google: 'https://generativelanguage.googleapis.com/v1beta',
   SiliconFlow: 'https://api.siliconflow.cn/v1',
 } as const
 

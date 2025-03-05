@@ -231,12 +231,9 @@ export const Reader = ({ data: initialData }: ReaderProps) => {
                         <button
                           key={key}
                           onClick={() => setSelectedModel(key as AIModel)}
-                          disabled={key === 'openai'}
                           className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                             selectedModel === key
                               ? 'bg-[#E84C3D] text-white'
-                              : key === 'openai'
-                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                           }`}
                         >
