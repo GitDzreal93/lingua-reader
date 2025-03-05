@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { useChat } from 'ai/react';
 
 interface Word {
   word: string;
@@ -47,21 +46,69 @@ type AIModel = keyof typeof AI_MODELS;
 
 export const Reader = ({ data: initialData }: ReaderProps) => {
   const [selectedModel, setSelectedModel] = useState<AIModel>('openai');
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [chatError, setChatError] = useState<Error | null>(null);
   
-  const { messages, input, handleInputChange, handleSubmit, isLoading, error: chatError } = useChat({
-    api: '/api/translate',
-    body: {
-      model: selectedModel
-    },
-    onResponse: (response) => {
-      // 使用 ai 包提供的数据处理机制
-      setHasTranslated(true);
-    },
-    onError: (error) => {
-      console.error('Chat error:', error);
-      setError(error.message);
+  // 处理输入变化
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+  };
+  
+  // 处理提交翻译请求
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!input.trim() || isLoading) return;
+    
+    setIsLoading(true);
+    setChatError(null);
+    setError(null);
+    
+    try {
+      const response = await fetch('/api/translate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [{ content: input }],
+          model: selectedModel
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || '翻译请求失败');
+      }
+      
+      const result = await response.json();
+      console.log('Translation result:', result);
+      
+      // 解析返回的数据
+      try {
+        const parsedData = JSON.parse(result.content);
+        if (parsedData.en && parsedData.zh && parsedData.words) {
+          setData({
+            en: parsedData.en,
+            zh: parsedData.zh,
+            words: parsedData.words
+          });
+          setHasTranslated(true);
+        } else {
+          throw new Error('返回数据格式不正确');
+        }
+      } catch (parseError) {
+        console.error('Parse error:', parseError);
+        setError('解析翻译结果失败，请重试');
+      }
+    } catch (error) {
+      console.error('Translation error:', error);
+      setChatError(error instanceof Error ? error : new Error('翻译失败'));
+    } finally {
+      setIsLoading(false);
     }
-  });
+  };
 
   const [selectedText, setSelectedText] = useState('');
   const [activeTab, setActiveTab] = useState<WordType>('All');
@@ -86,7 +133,9 @@ export const Reader = ({ data: initialData }: ReaderProps) => {
 
   // 重置所有状态
   const handleReset = () => {
+    setInput('');
     setError(null);
+    setChatError(null);
     setData(initialData);
     setHasTranslated(false);
   };
@@ -209,7 +258,7 @@ export const Reader = ({ data: initialData }: ReaderProps) => {
                 </div>
                 <div className="flex flex-col gap-2">
                   <button
-                    onClick={() => handleSubmit(new Event('submit'))}
+                    onClick={(e) => handleSubmit(e as unknown as React.FormEvent)}
                     disabled={isLoading || !input.trim()}
                     className={`w-[80px] h-[45px] bg-[#E84C3D] text-white text-base font-medium rounded-lg hover:bg-[#E84C3D]/90 transition-colors flex items-center justify-center shrink-0 ${
                       (isLoading || !input.trim()) ? 'opacity-50 cursor-not-allowed' : ''
