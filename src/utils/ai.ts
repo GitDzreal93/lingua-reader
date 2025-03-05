@@ -94,6 +94,7 @@ export class AIService {
       }
       console.log('Stream processing completed')
       console.log('Total chunks received:', chunkCount)
+      console.log('Final response', responseMessage.content)
       console.log('Final response length:', responseMessage.content.length)
 
       if (onFinish) {

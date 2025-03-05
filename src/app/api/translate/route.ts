@@ -63,6 +63,8 @@ export async function POST(req: Request) {
       } as Message
     ]);
 
+    console.log('router Translation API Response:', response);
+
     return new Response(JSON.stringify(response), {
       headers: { 'Content-Type': 'application/json' },
     });
