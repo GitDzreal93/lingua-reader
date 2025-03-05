@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { AIService, createAIService, type Message } from '@/utils/ai';
 import { SYSTEM_PROMPT, type AIModel } from '@/utils/aiModel';
 
+// 设置 Vercel 函数最大执行时间为 60 秒（最大允许值）
+export const maxDuration = 60;
+
 interface ModelConfig {
   apiKey: string;
   model: AIModel;

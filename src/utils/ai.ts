@@ -68,10 +68,16 @@ export class AIService {
       console.log('Model provider created:', provider ? 'success' : 'failed')
 
       console.log('Initializing streamText...')
+      // 创建一个 55 秒的超时信号，留出 5 秒的缓冲时间给 Vercel 函数
+      const abortController = new AbortController();
+      const timeoutId = setTimeout(() => abortController.abort(), 55000); // 55 秒
+      
       const { textStream } = streamText({
         model: provider,
         temperature: this.config.temperature ?? 0.8,
         messages: userMessages,
+        maxRetries: 3,  // 最大重试次数
+        abortSignal: abortController.signal, // 使用 AbortSignal 来设置超时
         onError: ({ error }) => {
           console.error('StreamText error:', error)
           if (onError && error instanceof Error) {
@@ -96,6 +102,9 @@ export class AIService {
       console.log('Total chunks received:', chunkCount)
       console.log('Final response', responseMessage.content)
       console.log('Final response length:', responseMessage.content.length)
+
+      // 清除超时定时器
+      clearTimeout(timeoutId);
 
       if (onFinish) {
         onFinish(responseMessage)
